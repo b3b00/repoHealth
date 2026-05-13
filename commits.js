@@ -16,6 +16,7 @@ export async function getCommitMetrics(octokit, owner, repo) {
         console.log("No commits found.");
         return null;
     }
+    console.log(`analysing ${commits.length} commits for frequency and contributors...`);
 
     const total = commits.length;
 

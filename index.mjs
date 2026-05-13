@@ -10,53 +10,85 @@ const userIndex = args.indexOf("--user");
 const repoIndex = args.indexOf("--repo");
 
 if (userIndex === -1 || repoIndex === -1 || !args[userIndex + 1] || !args[repoIndex + 1]) {
-  console.error("Usage: node index.mjs --user <username> --repo <repository>");
+  console.error("Usage: node index.mjs --user <username> --repo <repository> [--pat <token>]");
   process.exit(1);
 }
 
 const username = args[userIndex + 1];
 const repository = args[repoIndex + 1];
 
-const token = process.env.GITHUB_TOKEN;
+const patIndex = args.indexOf("--pat");
+const token = (patIndex !== -1 && args[patIndex + 1]) ? args[patIndex + 1] : process.env.GITHUB_TOKEN;
 if (!token) {
-  console.warn("Warning: GITHUB_TOKEN env variable not set. Unauthenticated requests are limited to 60/hour.");
+  console.warn("Warning: No token provided. Unauthenticated requests are limited to 60/hour.");
 }
 
 const octokit = new Octokit({ auth: token });
+
+function humanizeHours(hours) {
+  if (hours < 1) return "less than an hour";
+  if (hours < 24) return `${Math.round(hours)} hour${Math.round(hours) !== 1 ? "s" : ""}`;
+  const days = Math.floor(hours / 24);
+  const remainingHours = Math.round(hours % 24);
+  if (days < 7) return remainingHours > 0 ? `${days}d ${remainingHours}h` : `${days} day${days !== 1 ? "s" : ""}`;
+  const weeks = Math.floor(days / 7);
+  const remainingDays = days % 7;
+  if (days < 30) return remainingDays > 0 ? `${weeks}w ${remainingDays}d` : `${weeks} week${weeks !== 1 ? "s" : ""}`;
+  const months = Math.floor(days / 30);
+  const remainingWeeks = Math.floor((days % 30) / 7);
+  return remainingWeeks > 0 ? `${months}mo ${remainingWeeks}w` : `${months} month${months !== 1 ? "s" : ""}`;
+}
+
+function humanizeDays(days) {
+  if (days < 1) return "less than a day";
+  if (days < 7) return `${Math.round(days)} day${Math.round(days) !== 1 ? "s" : ""}`;
+  const weeks = Math.floor(days / 7);
+  const remainingDays = Math.round(days % 7);
+  if (days < 30) return remainingDays > 0 ? `${weeks}w ${remainingDays}d` : `${weeks} week${weeks !== 1 ? "s" : ""}`;
+  const months = Math.floor(days / 30);
+  const remainingWeeks = Math.floor((days % 30) / 7);
+  if (days < 365) return remainingWeeks > 0 ? `${months}mo ${remainingWeeks}w` : `${months} month${months !== 1 ? "s" : ""}`;
+  const years = Math.floor(days / 365);
+  const remainingMonths = Math.floor((days % 365) / 30);
+  return remainingMonths > 0 ? `${years}y ${remainingMonths}mo` : `${years} year${years !== 1 ? "s" : ""}`;
+}
 
 
 
 // Compare: https://docs.github.com/en/rest/reference/repos/#list-organization-repositories
 
   (async () => {
-    
-    console.log("Analysing data for repository:", username, "/", repository);
+    const outputFile = `${username}_${repository}.txt`;
+    const lines = [];
+    const log = (msg = "") => { console.log(msg); lines.push(msg); };
+
+    log(`Analysing data for repository: ${username} / ${repository}`);
     const issuesWithResolutionTime = await getIssues(octokit, username, repository);
-    console.log("Issues with resolution time:");
+    log("Issues with resolution time:");
     //console.log(issuesWithResolutionTime);
     if (issuesWithResolutionTime.length > 0) {
       const avgResolutionTime = issuesWithResolutionTime.reduce((acc, issue) => acc + issue.resolution_time_hours, 0) / issuesWithResolutionTime.length;
-      console.log(`Average resolution time: ${avgResolutionTime.toFixed(2)} hours`);
+      log(`Average resolution time: ${humanizeHours(avgResolutionTime)}`);
     }
 
     const releaseMetrics = await getReleaseMetrics(octokit, username, repository);
     if (releaseMetrics) {
-      console.log(`Total releases: ${releaseMetrics.total}`);
-      console.log(`Latest release: ${releaseMetrics.latest_tag} (${releaseMetrics.latest_published_at})`);
+      log(`Total releases: ${releaseMetrics.total}`);
+      log(`Latest release: ${releaseMetrics.latest_tag} (${releaseMetrics.latest_published_at})`);
       if (releaseMetrics.avg_days_between_releases !== null)
-        console.log(`Average days between releases: ${releaseMetrics.avg_days_between_releases.toFixed(1)}`);
+        log(`Average time between releases: ${humanizeDays(releaseMetrics.avg_days_between_releases)}`);
       if (releaseMetrics.releases_per_month !== null)
-        console.log(`Releases per month: ${releaseMetrics.releases_per_month.toFixed(2)}`);
+        log(`Releases per month: ${releaseMetrics.releases_per_month.toFixed(2)}`);
     }
 
     const commitMetrics = await getCommitMetrics(octokit, username, repository);
     if (commitMetrics) {
-      console.log(`Total commits: ${commitMetrics.total}`);
+      log(`Total commits: ${commitMetrics.total}`);
       if (commitMetrics.avg_commits_per_week !== null)
-        console.log(`Average commits per week: ${commitMetrics.avg_commits_per_week.toFixed(1)}`);
-      console.log("Top contributors:");
+        log(`Average commits per week: ${commitMetrics.avg_commits_per_week.toFixed(1)}`);
+      log("Top contributors:");
       for (const c of commitMetrics.top_contributors) {
-        console.log(`  ${c.author}: ${c.commits} commits`);
+        log(`  ${c.author}: ${c.commits} commits`);
       }
     }
 
@@ -66,21 +98,24 @@ const octokit = new Octokit({ auth: token });
     const now = Date.now();
     if (commitMetrics.last_commit_date > now - 30 * 24 * 60 * 60 * 1000) {
       commitAliveHeuristic = true;
-      console.log("There have been commits in the last month.");
+      log("There have been commits in the last month.");
     } else {
       commitAliveHeuristic = false;
-      console.log("No commits in the last month.");
+      log("No commits in the last month.");
     }
     if (releaseMetrics.last_release_date > now - 30 * 24 * 60 * 60 * 1000) {
       rleaseAliveHeuristic = true;
-      console.log("There has been a release in the last month.");
+      log("There has been a release in the last month.");
     } else {
       releaseAliveHeuristic = false;
-      console.log("No releases in the last month.");
+      log("No releases in the last month.");
     }
 
     if (commitAliveHeuristic && releaseAliveHeuristic) {
-      console.log("The repository appears to be active based on recent commits and releases.");
+      log("The repository appears to be active based on recent commits and releases.");
     }
+
+    fs.writeFileSync(outputFile, lines.join("\n") + "\n");
+    console.log(`\nMetrics written to ${outputFile}`);
   
 })();

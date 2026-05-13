@@ -16,6 +16,7 @@ export async function getReleaseMetrics(octokit, owner, repo) {
         console.log("No releases found.");
         return null;
     }
+    console.log(`analysing ${releases.length} releases for frequency and timing...`);
 
     // Sort by published date ascending
     const sorted = releases

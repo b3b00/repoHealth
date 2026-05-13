@@ -1,0 +1,22 @@
+Analysing data for repository: b3b00 / csly
+Issues with resolution time:
+Average resolution time: 2w 6d
+Total releases: 182
+Latest release: v3.8.0-alpha1 (2026-02-12T20:02:42Z)
+Average time between releases: 2w 4d
+Releases per month: 1.74
+Total commits: 2080
+Average commits per week: 4.4
+Top contributors:
+  b3b00: 1535 commits
+  olduh29: 348 commits
+  dependabot[bot]: 136 commits
+  magne: 11 commits
+  arlm: 11 commits
+  aldosa: 7 commits
+  bdke: 6 commits
+  invalid-email-address: 6 commits
+  heku: 4 commits
+  frg2089: 2 commits
+There have been commits in the last month.
+No releases in the last month.

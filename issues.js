@@ -1,29 +1,26 @@
-
+import fs from "fs";
 
 export async function getIssues(octokit, user, repo) {
     let issuesWithResolutionTime = [];
-    const issues = await octokit
+    let issues = await octokit
         .paginate("GET /repos/{owner}/{repo}/issues", {
-            owner: "b3b00",
-            repo: "csly",
+            owner: user,
+            repo: repo,
             state: "all",
         });
     if (issues && issues.length > 0) {
+        issues = issues.filter(issue => !issue.pull_request); // Exclude pull requests
+        console.log(`analysing ${issues.length} issues for resolution time...`);
         for (let i = 0; i < issues.length; i++) {
             const filename = `issues/issue_${issues[i].number}.json`;
             const issue = issues[i];
             if (issue.hasOwnProperty("pull_request")) {
-                console.log(`Skipping pull request #${issue.number}: ${issue.title}`);
+                //console.log(`Skipping pull request #${issue.number}: ${issue.title}`);
                 continue;
-            }
-            else {
-                console.log(`Processing issue #${issue.number}: ${issue.title}`);
-            }
-            //console.log(`Issue #${issue.number}: ${issue.title}`);          
-            //   fs.writeFileSync(filename, JSON.stringify(issue, null, 2));
-            //   console.log(`Saved issue #${issue.number} to ${filename}`);
+            }            
+            fs.writeFileSync(filename, JSON.stringify(issue, null, 2));
             const resolutionTime = await getIssueResolutionTime(octokit, issue);
-            console.log(`Resolution time for issue #${issue.number}: ${resolutionTime !== null ? resolutionTime.toFixed(2) + " hours" : "N/A"}`);
+//            console.log(`Resolution time for issue #${issue.number}: ${resolutionTime !== null ? resolutionTime.toFixed(2) + " hours" : "N/A"}`);
             if (resolutionTime !== null) {
                 issuesWithResolutionTime.push({
                     issue_number: issue.number,
