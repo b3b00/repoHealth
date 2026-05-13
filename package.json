@@ -1,0 +1,25 @@
+{
+  "name": "analyseghrepo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@octokit/core": "^7.0.6",
+    "@octokit/types": "^16.0.0",
+    "@types/node": "^25.7.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "@octokit/auth-oauth-device": "^8.0.3",
+    "@octokit/rest": "^22.0.1"
+  },
+  "type": "module"
+}
