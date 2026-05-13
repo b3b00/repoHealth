@@ -1,6 +1,8 @@
 import { Octokit } from "@octokit/rest";
 import fs from "fs";
 import { getIssues } from "./issues.js";
+import { getReleaseMetrics } from "./releases.js";
+import { getCommitMetrics } from "./commits.js";
 const octokit = new Octokit();
 
 
@@ -38,6 +40,48 @@ console.log("List repositories for a user:");
       console.log(`Average resolution time: ${avgResolutionTime.toFixed(2)} hours`);
     }
 
+    const releaseMetrics = await getReleaseMetrics(octokit, "b3b00", "csly");
+    if (releaseMetrics) {
+      console.log(`Total releases: ${releaseMetrics.total}`);
+      console.log(`Latest release: ${releaseMetrics.latest_tag} (${releaseMetrics.latest_published_at})`);
+      if (releaseMetrics.avg_days_between_releases !== null)
+        console.log(`Average days between releases: ${releaseMetrics.avg_days_between_releases.toFixed(1)}`);
+      if (releaseMetrics.releases_per_month !== null)
+        console.log(`Releases per month: ${releaseMetrics.releases_per_month.toFixed(2)}`);
+    }
 
+    const commitMetrics = await getCommitMetrics(octokit, "b3b00", "csly");
+    if (commitMetrics) {
+      console.log(`Total commits: ${commitMetrics.total}`);
+      if (commitMetrics.avg_commits_per_week !== null)
+        console.log(`Average commits per week: ${commitMetrics.avg_commits_per_week.toFixed(1)}`);
+      console.log("Top contributors:");
+      for (const c of commitMetrics.top_contributors) {
+        console.log(`  ${c.author}: ${c.commits} commits`);
+      }
+    }
+
+    let commitAliveHeuristic = true;
+    let releaseAliveHeuristic = true;
+
+    const now = Date.now();
+    if (commitMetrics.last_commit_date > now - 30 * 24 * 60 * 60 * 1000) {
+      commitAliveHeuristic = true;
+      console.log("There have been commits in the last month.");
+    } else {
+      commitAliveHeuristic = false;
+      console.log("No commits in the last month.");
+    }
+    if (releaseMetrics.last_release_date > now - 30 * 24 * 60 * 60 * 1000) {
+      rleaseAliveHeuristic = true;
+      console.log("There has been a release in the last month.");
+    } else {
+      rleaseAliveHeuristic = false;
+      console.log("No releases in the last month.");
+    }
+
+    if (comitAliveHeuristic && rleaseAliveHeuristic) {
+      console.log("The repository appears to be active based on recent commits and releases.");
+    }
   
 })();
