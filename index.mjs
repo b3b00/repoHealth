@@ -88,6 +88,9 @@ function humanizeDays(days) {
 // Compare: https://docs.github.com/en/rest/reference/repos/#list-organization-repositories
 
   (async () => {
+
+const repo = await octokit.rest.repos.get({owner:username,repo:repository});                                    console.log(repo);
+
     const outputFile = `${username}_${repository}.txt`;
     const lines = [];
     const log = (msg = "") => { console.log(msg); lines.push(msg); };
