@@ -105,7 +105,7 @@ log(`stars : ${stars} 🌞`);
     if (issuesWithResolutionTime.issuesWithResolutionTime.length > 0) {
       const avgResolutionTime = issuesWithResolutionTime.issuesWithResolutionTime.reduce((acc, issue) => acc + issue.resolution_time_hours, 0) / issuesWithResolutionTime.issuesWithResolutionTime.length;
       log(`Average resolution time: ${humanizeHours(avgResolutionTime)}`);
-log(ˋopened issues:${issuesWithResolutionTime.opened)
+log(ˋopened issues:${issuesWithResolutionTime.openedˋ);
     }
 
     const releaseMetrics = await getReleaseMetrics(octokit, username, repository);
