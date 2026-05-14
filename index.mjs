@@ -4,18 +4,48 @@ import fs from "fs";
 import { getIssues } from "./issues.js";
 import { getReleaseMetrics } from "./releases.js";
 import { getCommitMetrics } from "./commits.js";
+import * as readline from 'node:readline/promises';
+import { stdin as input, stdout as output } from 'node:process';
+import { addSyntheticLeadingComment } from "typescript";
+
 
 const args = process.argv.slice(2);
 const userIndex = args.indexOf("--user");
 const repoIndex = args.indexOf("--repo");
 
-if (userIndex === -1 || repoIndex === -1 || !args[userIndex + 1] || !args[repoIndex + 1]) {
-  console.error("Usage: node index.mjs --user <username> --repo <repository> [--pat <token>]");
-  process.exit(1);
+async function readInput(question) {
+  const rl = readline.createInterface({ input, output });
+
+  const answer = await rl.question(question);
+
+  rl.close();
+  return answer;
+
 }
 
-const username = args[userIndex + 1];
-const repository = args[repoIndex + 1];
+
+// if (userIndex === -1 || repoIndex === -1 || !args[userIndex + 1] || !args[repoIndex + 1]) {
+//   console.error("Usage: node index.mjs --user <username> --repo <repository> [--pat <token>]");
+//   process.exit(1);
+// }
+
+console.log(`userI:${userIndex} , repoI:${repoIndex}`);
+
+
+let username = "";
+if (userIndex !== -1) {
+  username = args[userIndex + 1];
+}
+else {
+  username = await readInput("user : ");
+}
+let repository = "";
+if (repoIndex !== -1) {
+  repository = args[repoIndex + 1];
+}
+else {
+  repository = await readInput("repository : ");
+}
 
 const patIndex = args.indexOf("--pat");
 const token = (patIndex !== -1 && args[patIndex + 1]) ? args[patIndex + 1] : process.env.GITHUB_TOKEN;
