@@ -91,11 +91,14 @@ function humanizeDays(days) {
 
 const repo = await octokit.rest.repos.get({owner:username,repo:repository});                                    console.log(repo);
 
+const stars = repo.data.stargazers_count;
+
     const outputFile = `${username}_${repository}.txt`;
     const lines = [];
     const log = (msg = "") => { console.log(msg); lines.push(msg); };
 
     log(`Analysing data for repository: ${username} / ${repository}`);
+log(`stars : ${stars} 🌞`);
     const issuesWithResolutionTime = await getIssues(octokit, username, repository);
     log("Issues with resolution time:");
     //console.log(issuesWithResolutionTime);
