@@ -100,12 +100,12 @@ const stars = repo.data.stargazers_count;
     log(`Analysing data for repository: ${username} / ${repository}`);
 log(`stars : ${stars} 🌞`);
     const issuesWithResolutionTime = await getIssues(octokit, username, repository);
-    log("Issues with resolution time:");
+    log("issues with resolution time:");
     //console.log(issuesWithResolutionTime);
     if (issuesWithResolutionTime.issuesWithResolutionTime.length > 0) {
       const avgResolutionTime = issuesWithResolutionTime.issuesWithResolutionTime.reduce((acc, issue) => acc + issue.resolution_time_hours, 0) / issuesWithResolutionTime.issuesWithResolutionTime.length;
       log(`Average resolution time: ${humanizeHours(avgResolutionTime)}`);
-log(ˋopened issues:${issuesWithResolutionTime.opened}ˋ);
+log("opened issues:"+issuesWithResolutionTime.opened);
     }
 
     const releaseMetrics = await getReleaseMetrics(octokit, username, repository);
