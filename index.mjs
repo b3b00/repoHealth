@@ -139,12 +139,18 @@ log(`stars : ${stars} 🌞`);
       commitAliveHeuristic = false;
       log("No commits in the last month.");
     }
-    if (releaseMetrics.last_release_date > now - 30 * 24 * 60 * 60 * 1000) {
+    if (releaseMetrics  && releaseMetrics.last_release_date > now - 30 * 24 * 60 * 60 * 1000) {
       rleaseAliveHeuristic = true;
       log("There has been a release in the last month.");
     } else {
+if (releaseMetrics) {
       releaseAliveHeuristic = false;
       log("No releases in the last month.");
+}
+else {
+log('no release metrics');
+releaseAliveHeuristic = true;
+}
     }
 
     if (commitAliveHeuristic && releaseAliveHeuristic) {
