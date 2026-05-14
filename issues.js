@@ -23,8 +23,7 @@ export async function getIssues(octokit, user, repo) {
             const resolutionTime = await getIssueResolutionTime(octokit, issue);
 //            console.log(`Resolution time for issue #${issue.number}: ${resolutionTime !== null ? resolutionTime.toFixed(2) + " hours" : "N/A"}`);
             if (resolutionTime !== null) {
-                issuesWithResolutionTime.push({
-							opened:opened,
+                issuesWithResolutionTime.push({							
                     issue_number: issue.number,
                     title: issue.title,
                     resolution_time_hours: resolutionTime
@@ -34,7 +33,7 @@ export async function getIssues(octokit, user, repo) {
     } else {
         console.log("No issues found.");
     }
-    return issuesWithResolutionTime;
+    return {issuesWithResolutionTime,opened};
 }
 
 async function getIssueResolutionTime(octokit, issue) {
