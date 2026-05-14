@@ -89,7 +89,7 @@ function humanizeDays(days) {
 
   (async () => {
 
-const repo = await octokit.rest.repos.get({owner:username,repo:repository});                                    console.log(repo);
+const repo = await octokit.rest.repos.get({owner:username,repo:repository});                                    
 
 const stars = repo.data.stargazers_count;
 
