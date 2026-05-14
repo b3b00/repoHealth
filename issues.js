@@ -2,6 +2,7 @@ import fs from "fs";
 
 export async function getIssues(octokit, user, repo) {
     let issuesWithResolutionTime = [];
+let opened =0;
     let issues = await octokit
         .paginate("GET /repos/{owner}/{repo}/issues", {
             owner: user,
@@ -9,7 +10,7 @@ export async function getIssues(octokit, user, repo) {
             state: "all",
         });
     if (issues && issues.length > 0) {
-			const opened = issues.filter(i => i.state=="open").length;
+		 opened = issues.filter(i => i.state=="open").length;
         issues = issues.filter(issue => !issue.pull_request); // Exclude pull requests
         console.log(`analysing ${issues.length} issues for resolution time...`);
         for (let i = 0; i < issues.length; i++) {
