@@ -16,6 +16,13 @@ export async function getCommitMetrics(octokit, owner, repo) {
         console.log("No commits found.");
         return null;
     }
+
+
+first = commits.sort((a,b) => (a.commit.author.date > b.commit.author.date) ? 1 : ((b.commit.author.date >  a.commit.author.date ) ? -1 : 0))[0]
+
+
+
+
     console.log(`analysing ${commits.length} commits for frequency and contributors...`);
 
     const total = commits.length;
@@ -58,6 +65,7 @@ export async function getCommitMetrics(octokit, owner, repo) {
     }
 
     return {
+start:first.commit.author.date,
         total,
         avg_commits_per_week: avgCommitsPerWeek,
         top_contributors: topContributors,
