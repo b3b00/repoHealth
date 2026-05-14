@@ -18,7 +18,7 @@ export async function getCommitMetrics(octokit, owner, repo) {
     }
 
 
-first = commits.sort((a,b) => (a.commit.author.date > b.commit.author.date) ? 1 : ((b.commit.author.date >  a.commit.author.date ) ? -1 : 0))[0]
+const first = commits.sort((a,b) => (a.commit.author.date > b.commit.author.date) ? 1 : ((b.commit.author.date >  a.commit.author.date ) ? -1 : 0))[0]
 
 
 
