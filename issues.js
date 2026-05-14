@@ -9,6 +9,7 @@ export async function getIssues(octokit, user, repo) {
             state: "all",
         });
     if (issues && issues.length > 0) {
+			const opened = issues.filter(i => i.state=="open").length;
         issues = issues.filter(issue => !issue.pull_request); // Exclude pull requests
         console.log(`analysing ${issues.length} issues for resolution time...`);
         for (let i = 0; i < issues.length; i++) {
@@ -23,6 +24,7 @@ export async function getIssues(octokit, user, repo) {
 //            console.log(`Resolution time for issue #${issue.number}: ${resolutionTime !== null ? resolutionTime.toFixed(2) + " hours" : "N/A"}`);
             if (resolutionTime !== null) {
                 issuesWithResolutionTime.push({
+							opened:opened,
                     issue_number: issue.number,
                     title: issue.title,
                     resolution_time_hours: resolutionTime
